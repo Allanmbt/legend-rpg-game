@@ -207,8 +207,8 @@ const generateMonster = (playerLevel, battlefieldId) => {
 
 // 计算升级所需经验
 const calculateExpToNextLevel = (level) => {
-    // 使用指数增长公式: 100 * (level)^1.5
-    return Math.floor(100 * Math.pow(level, 1.5));
+    // 使用指数增长公式: 100 * (level)^1.2
+    return Math.floor(100 * Math.pow(level, 1.2));
 };
 
 // 计算装备提供的属性总和
