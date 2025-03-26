@@ -1,0 +1,125 @@
+.game-menu {
+    height: 100px;
+    background-color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+}
+
+.player-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 8px;
+    min-width: 180px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: white;
+    font-size: 14px;
+}
+
+.stat-label {
+    font-weight: bold;
+    color: #aaa;
+}
+
+.stat-value {
+    color: #4CAF50;
+}
+
+.menu-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.menu-item {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 70px;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-3px);
+}
+
+.menu-item:active {
+    transform: translateY(0);
+}
+
+.menu-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.menu-text {
+    font-size: 14px;
+}
+
+.menu-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #f44336;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .game-menu {
+        height: auto;
+        flex-direction: column;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .player-stats {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .menu-buttons {
+        width: 100%;
+        justify-content: space-around;
+        flex-wrap: wrap;
+    }
+
+    .menu-item {
+        min-width: 60px;
+        margin-bottom: 5px;
+    }
+
+    .menu-icon {
+        font-size: 20px;
+    }
+
+    .menu-text {
+        font-size: 12px;
+    }
+}

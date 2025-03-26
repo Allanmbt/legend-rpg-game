@@ -1,0 +1,75 @@
+.battle-log {
+    height: 200px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 2px solid #ccc;
+    display: flex;
+    flex-direction: column;
+}
+
+.log-title {
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 16px;
+}
+
+.log-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.log-entry {
+    margin-bottom: 6px;
+    padding: 5px 0;
+    border-bottom: 1px dotted #eee;
+    animation: fadeIn 0.3s ease;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.log-empty {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    margin-top: 50px;
+}
+
+.critical {
+    color: #ff3b30;
+    font-weight: bold;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 自定义滚动条 */
+.log-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.log-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.log-content::-webkit-scrollbar-thumb {
+    background: #bbb;
+    border-radius: 10px;
+}
+
+.log-content::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
