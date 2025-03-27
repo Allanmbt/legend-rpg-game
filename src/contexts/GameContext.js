@@ -7,21 +7,27 @@ const battlefields = [
         name: '新手村',
         levelRange: [1, 10],
         background: '#e6f7ff',
-        description: '适合1-10级玩家的新手战场'
+        description: '适合1-10级玩家的新手战场',
+        bossDefeated: false,  // 用于跟踪boss是否被打败
+        bossIndex: 0  // 对应的boss索引
     },
     {
         id: 'intermediate',
         name: '进阶森林',
         levelRange: [11, 20],
         background: '#e6ffe6',
-        description: '适合11-20级玩家的进阶战场'
+        description: '适合11-20级玩家的进阶战场',
+        bossDefeated: false,
+        bossIndex: 1
     },
     {
         id: 'hell',
         name: '地狱级难度',
         levelRange: [21, 30],
         background: '#ffe6e6',
-        description: '适合21-30级玩家的高难度战场'
+        description: '适合21-30级玩家的高难度战场',
+        bossDefeated: false,
+        bossIndex: 2
     }
 ];
 
@@ -171,6 +177,65 @@ const generateMonster = (playerLevel, battlefieldId) => {
         { name: '恶魔', emoji: '😈', baseHealth: 65, baseAttack: 10, baseDefense: 3, baseAgility: 3 }
     ];
 
+    // Boss配置（每个战场一个）
+    const bossTypes = [
+        // 1-10级Boss
+        {
+            name: '森林守护者', emoji: '🌲', baseHealth: 300, baseAttack: 15, baseDefense: 8, baseAgility: 5,
+            expReward: 200, dropChance: 0.8, dropRateBonus: 0.2
+        },
+        // 11-20级Boss
+        {
+            name: '地下魔王', emoji: '👑', baseHealth: 600, baseAttack: 35, baseDefense: 18, baseAgility: 12,
+            expReward: 500, dropChance: 0.9, dropRateBonus: 0.3
+        },
+        // 21-30级Boss
+        {
+            name: '混沌之主', emoji: '🔥', baseHealth: 1200, baseAttack: 60, baseDefense: 30, baseAgility: 20,
+            expReward: 1000, dropChance: 1.0, dropRateBonus: 0.4
+        }
+    ];
+
+    // 生成Boss怪物
+    const generateBoss = (battlefieldId) => {
+        const battlefield = battlefields.find(bf => bf.id === battlefieldId);
+        if (!battlefield) return null;
+
+        const bossIndex = battlefield.id === 'novice' ? 0 :
+            battlefield.id === 'intermediate' ? 1 : 2;
+
+        const bossType = bossTypes[bossIndex];
+        const levelRange = battlefield.levelRange;
+        const bossLevel = levelRange[1]; // Boss等级是区间的最高等级
+
+        // 基于等级计算Boss属性（Boss有额外倍率）
+        let levelMultiplier;
+        if (battlefieldId === 'novice') {
+            levelMultiplier = 1.2 + (bossLevel - 1) * 0.1; // 基础1.2倍
+        } else if (battlefieldId === 'intermediate') {
+            levelMultiplier = 1.8 + (bossLevel - 11) * 0.15; // 基础1.8倍
+        } else {
+            levelMultiplier = 3.0 + (bossLevel - 21) * 0.2; // 基础3倍
+        }
+
+        return {
+            name: `${bossType.name} Lv.${bossLevel}`,
+            emoji: bossType.emoji,
+            level: bossLevel,
+            maxHealth: Math.floor(bossType.baseHealth * levelMultiplier),
+            currentHealth: Math.floor(bossType.baseHealth * levelMultiplier),
+            attack: Math.floor(bossType.baseAttack * levelMultiplier),
+            defense: Math.floor(bossType.baseDefense * levelMultiplier),
+            agility: Math.floor(bossType.baseAgility * levelMultiplier),
+            critChance: 0.15 + bossLevel * 0.01, // Boss暴击率更高
+            critMultiplier: 2.0,  // Boss暴击伤害更高
+            expReward: bossType.expReward,
+            dropChance: bossType.dropChance,
+            dropRateBonus: bossType.dropRateBonus,
+            isBoss: true
+        };
+    };
+
     // 根据战场难度选择怪物
     let availableMonsters;
     if (battlefieldId === 'novice') {
@@ -205,12 +270,17 @@ const generateMonster = (playerLevel, battlefieldId) => {
     };
 };
 
-// 计算升级所需经验
+// 计算升级所需经验 - 更平滑的算法
 const calculateExpToNextLevel = (level) => {
-    // 使用指数增长公式: 100 * (level)^1.2
-    return Math.floor(100 * Math.pow(level, 1.2));
-};
+    // 基础经验值
+    const baseExp = 50;
+    // 每级增加的线性部分
+    const linearGrowth = 40 * (level - 1);
+    // 轻微的级别调整(每5级提升一次难度)
+    const tierMultiplier = 1 + Math.floor(level / 5) * 0.1;
 
+    return Math.floor((baseExp + linearGrowth) * tierMultiplier);
+};
 // 计算装备提供的属性总和
 const calculateEquipmentStats = (equipment) => {
     const stats = {
@@ -391,6 +461,23 @@ function gameReducer(state, action) {
                 gameScene: 'select',
                 monster: null,
                 battleLogs: []
+            };
+            break;
+
+        // 挑战Boss
+        case 'CHALLENGE_BOSS':
+            const bossMonster = generateBoss(state.selectedBattlefield.id);
+            newState = {
+                ...state,
+                monster: bossMonster,
+                battleLogs: [
+                    {
+                        id: Date.now(),
+                        text: `Boss战斗开始！${bossMonster.name}出现了！`,
+                        isCritical: true
+                    },
+                    ...state.battleLogs.slice(0, 19)
+                ]
             };
             break;
 
@@ -852,10 +939,26 @@ function gameReducer(state, action) {
                 // 检查是否掉落装备
                 const monster = state.monster;
                 const randomRoll = Math.random();
+                const isBoss = monster.isBoss || false;
+                let dropRateBonus = isBoss ? (monster.dropRateBonus || 0.2) : 0;
 
-                if (randomRoll <= monster.dropChance) {
+                // 如果是Boss，并且之前没有被击败过，则更新战场状态
+                let updatedBattlefields = [...state.battlefields];
+                if (isBoss) {
+                    const selectedBattlefieldId = state.selectedBattlefield.id;
+                    const battlefieldIndex = updatedBattlefields.findIndex(bf => bf.id === selectedBattlefieldId);
+
+                    if (battlefieldIndex !== -1 && !updatedBattlefields[battlefieldIndex].bossDefeated) {
+                        updatedBattlefields[battlefieldIndex] = {
+                            ...updatedBattlefields[battlefieldIndex],
+                            bossDefeated: true
+                        };
+                    }
+                }
+
+                if (randomRoll <= (monster.dropChance + dropRateBonus)) {
                     // 生成装备
-                    const equipment = generateEquipment(monster.level);
+                    const equipment = generateEquipment(monster.level, dropRateBonus);
 
                     // 检查物品栏是否已满
                     if (state.inventory.items.length >= state.inventory.maxSlots) {
@@ -865,15 +968,15 @@ function gameReducer(state, action) {
                             battleLogs: [
                                 {
                                     id: Date.now(),
-                                    text: `怪物掉落了${equipment.rarityName}品质的${equipment.name}，但物品栏已满，无法拾取！`,
+                                    text: `${monster.name}掉落了${equipment.rarityName}品质的${equipment.name}，但物品栏已满，无法拾取！`,
                                     isCritical: true
                                 },
                                 ...state.battleLogs.slice(0, 19)
-                            ]
+                            ],
+                            battlefields: updatedBattlefields
                         };
                         break;
                     }
-
                     // 添加装备到物品栏
                     const newInventory = { ...state.inventory };
                     newInventory.items.push({ ...equipment, count: 1 });
@@ -884,15 +987,31 @@ function gameReducer(state, action) {
                         battleLogs: [
                             {
                                 id: Date.now(),
-                                text: `怪物掉落了${equipment.rarityName}品质的${equipment.name}！`,
+                                text: `${monster.name}掉落了${equipment.rarityName}品质的${equipment.name}！`,
                                 isCritical: true
                             },
                             ...state.battleLogs.slice(0, 19)
-                        ]
+                        ],
+                        battlefields: updatedBattlefields
                     };
                 } else {
-                    // 没有掉落装备
-                    newState = state;
+                    // 没有掉落装备，但可能需要更新Boss状态
+                    newState = {
+                        ...state,
+                        battlefields: updatedBattlefields
+                    };
+
+                    // 如果是Boss，添加击败Boss的消息
+                    if (isBoss) {
+                        newState.battleLogs = [
+                            {
+                                id: Date.now(),
+                                text: `成功击败了${monster.name}！新的区域已解锁！`,
+                                isCritical: true
+                            },
+                            ...state.battleLogs.slice(0, 19)
+                        ];
+                    }
                 }
             }
             break;

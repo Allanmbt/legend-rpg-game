@@ -29,6 +29,11 @@ const Character = ({ character, emoji, isPlayer, isAttacking, isDamaged }) => {
             >
                 {emoji || (isPlayer ? '😎' : '👹')}
             </div>
+
+            {/* Boss标记 */}
+            {character.isBoss && (
+                <div className="boss-indicator">BOSS</div>
+            )}
         </div>
     );
 };
@@ -55,6 +60,13 @@ const BattleArea = () => {
     // 暂停/继续游戏
     const toggleGameRunning = () => {
         dispatch({ type: 'TOGGLE_GAME' });
+    };
+
+    // 挑战Boss
+    const handleChallengeBoss = () => {
+        if (window.confirm(`确定要挑战${selectedBattlefield.name}的Boss吗？准备好了再挑战！`)) {
+            dispatch({ type: 'CHALLENGE_BOSS' });
+        }
     };
 
     // 设置背景色
@@ -86,6 +98,23 @@ const BattleArea = () => {
                         Lv.{player.level} - 经验: {player.experience}/{player.expToNextLevel}
                     </div>
                 </div>
+            </div>
+
+            {/* Boss挑战按钮 */}
+            <div className="boss-challenge-container">
+                <button
+                    className="boss-challenge-button"
+                    onClick={handleChallengeBoss}
+                    // 当前怪物是Boss时禁用按钮
+                    disabled={monster && monster.isBoss}
+                >
+                    ⚔️ 挑战Boss
+                </button>
+                {monster && monster.isBoss && (
+                    <div className="boss-battle-indicator">
+                        Boss战斗中
+                    </div>
+                )}
             </div>
 
             {/* 战斗区域 */}

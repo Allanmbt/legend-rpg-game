@@ -1,279 +1,95 @@
-.battle-area {
-    height: 300px;
-    background-color: #e6f7ff;
-    background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+/* Boss挑战按钮 */
+.boss-challenge-container {
     display: flex;
-    flex-direction: column;
-    padding: 10px;
-    position: relative;
-    border-bottom: 2px solid #ccc;
-    transition: background-color 0.5s ease;
+    justify-content: center;
+    margin: 10px 0;
 }
 
-/* 战场信息 */
-.battlefield-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.battlefield-name {
-    font-size: 18px;
-    font-weight: bold;
-    color: #333;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
-}
-
-.return-button,
-.toggle-button {
-    background-color: rgba(255, 255, 255, 0.8);
+.boss-challenge-button {
+    background-color: #ff6b6b;
+    color: white;
     border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
     cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
-.return-button:hover,
-.toggle-button:hover {
-    background-color: white;
+.boss-challenge-button:hover:not(:disabled) {
+    background-color: #e53935;
     transform: translateY(-2px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 经验条 */
-.experience-display {
-    margin-bottom: 10px;
+.boss-challenge-button:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
-.exp-bar {
-    height: 15px;
-    background-color: #ddd;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid #333;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+.boss-battle-indicator {
+    background-color: #ff3d00;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    animation: pulse 1.5s infinite;
+    margin-left: 10px;
 }
 
-.exp-fill {
-    height: 100%;
-    background-color: #8e44ad;
-    background-image: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-    transition: width 0.3s ease;
-}
-
-.exp-text {
+/* Boss标记 */
+.boss-indicator {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 10px;
-    font-weight: bold;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
-}
-
-/* 战斗角色区域 */
-.battle-characters {
-    flex: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
-}
-
-.character-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 150px;
-    position: relative;
-    transition: transform 0.3s ease;
-}
-
-.player {
-    margin-right: auto;
-}
-
-.monster {
-    margin-left: auto;
-}
-
-.battle-vs {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 28px;
-    font-weight: bold;
-    color: #ff6b6b;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.character-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 5px;
-}
-
-.character-name {
-    font-weight: bold;
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.8);
+    top: -10px;
+    right: -10px;
+    background-color: #ff3d00;
+    color: white;
     padding: 3px 8px;
     border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 140px;
-}
-
-.character-level {
-    background-color: #ff9800;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 12px;
+    font-size: 0.8rem;
     font-weight: bold;
-    margin-top: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
 }
 
-.health-bar {
-    width: 120px;
-    height: 15px;
-    background-color: #ddd;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    overflow: hidden;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 增强角色容器的相对定位，方便放置Boss标记 */
+.character-container {
     position: relative;
-    border: 2px solid #333;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.health-bar-fill {
-    height: 100%;
-    width: 100%;
-    background-color: #4CAF50;
-    transition: width 0.3s ease, background-color 0.3s ease;
-}
-
-.health-text {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 10px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-.character {
-    font-size: 60px;
-    transition: transform 0.3s ease, filter 0.3s ease;
-    margin: 10px 0;
-    filter: drop-shadow(3px 3px 5px rgba(0, 0, 0, 0.2));
-}
-
-/* 动画类 */
-.attacking {
-    animation: attack 0.5s ease;
-}
-
-.damaged {
-    animation: damage 0.5s ease;
-}
-
-@keyframes attack {
-    0% {
-        transform: translateX(0);
+/* 适配移动端 */
+@media (max-width: 600px) {
+    .boss-challenge-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
     }
 
-    50% {
-        transform: translateX(50px);
+    .boss-challenge-button {
+        width: 80%;
     }
 
-    100% {
-        transform: translateX(0);
-    }
-}
-
-@keyframes damage {
-    0% {
-        transform: translateX(0);
-        filter: brightness(1);
-    }
-
-    25% {
-        transform: translateX(-10px);
-        filter: brightness(1.5);
-    }
-
-    50% {
-        transform: translateX(10px);
-        filter: brightness(2);
-    }
-
-    75% {
-        transform: translateX(-10px);
-        filter: brightness(1.5);
-    }
-
-    100% {
-        transform: translateX(0);
-        filter: brightness(1);
-    }
-}
-
-/* 动画方向调整 */
-.player .attacking {
-    animation-name: player-attack;
-}
-
-.monster .attacking {
-    animation-name: monster-attack;
-}
-
-@keyframes player-attack {
-    0% {
-        transform: translateX(0);
-    }
-
-    50% {
-        transform: translateX(50px);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
-}
-
-@keyframes monster-attack {
-    0% {
-        transform: translateX(0);
-    }
-
-    50% {
-        transform: translateX(-50px);
-    }
-
-    100% {
-        transform: translateX(0);
+    .boss-battle-indicator {
+        margin-left: 0;
     }
 }

@@ -411,7 +411,8 @@
 
 .inventory-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+    /* 桌面版4列 */
     gap: 15px;
 }
 
@@ -568,6 +569,7 @@
     }
 
     .inventory-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(3, 1fr);
+        /* 移动端3列 */
     }
 }

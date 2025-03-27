@@ -19,14 +19,22 @@ const InventoryModal = () => {
         dispatch({ type: 'CLOSE_MODAL' });
     };
 
-    // 处理右键点击物品
-    const handleRightClick = (e, item) => {
-        e.preventDefault();
+    // 处理点击物品 - 替代右键菜单
+    const handleItemClick = (e, item) => {
+        // 计算菜单位置 - 显示在物品下方
+        const rect = e.currentTarget.getBoundingClientRect();
+
         setContextMenu({
             isOpen: true,
-            position: { x: e.clientX, y: e.clientY },
+            position: {
+                x: rect.left + rect.width / 2, // 居中
+                y: rect.bottom + 10 // 位于物品下方
+            },
             item
         });
+
+        // 防止事件冒泡
+        e.stopPropagation();
     };
 
     // 关闭右键菜单
@@ -82,8 +90,13 @@ const InventoryModal = () => {
         );
     };
 
+    // 点击遮罩层时关闭菜单
+    const handleOverlayClick = () => {
+        closeContextMenu();
+    };
+
     return (
-        <div className="modal-overlay" onClick={handleClose}>
+        <div className="modal-overlay" onClick={handleOverlayClick}>
             <div className="modal-content inventory-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
                     <h2>物品栏</h2>
@@ -95,7 +108,7 @@ const InventoryModal = () => {
 
                 <div className="inventory-container">
                     <div className="inventory-help">
-                        右键点击物品可以进行装备或丢弃操作
+                        点击物品可以进行装备或丢弃操作
                     </div>
 
                     <div className="inventory-grid">
@@ -105,7 +118,7 @@ const InventoryModal = () => {
                                     key={item.id}
                                     className="inventory-item"
                                     style={{ borderColor: item.rarityColor || '#a0a0a0' }}
-                                    onContextMenu={(e) => handleRightClick(e, item)}
+                                    onClick={(e) => handleItemClick(e, item)}
                                 >
                                     <div className="item-header">
                                         <span className="item-emoji">{item.emoji}</span>
@@ -149,7 +162,7 @@ const InventoryModal = () => {
                     </div>
                 </div>
 
-                {/* 右键菜单 */}
+                {/* 操作菜单 */}
                 {contextMenu.isOpen && (
                     <ItemContextMenu
                         position={contextMenu.position}

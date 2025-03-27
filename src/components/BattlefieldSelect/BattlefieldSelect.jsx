@@ -5,14 +5,15 @@ import { useGame } from '../../contexts/GameContext';
 const BattlefieldSelect = () => {
     const { state, dispatch } = useGame();
     const { player, battlefields } = state;
-    // 使用可选链和默认值，确保即使inventory为undefined也不会报错
     const inventory = state.inventory || { items: [] };
 
     // 选择战场处理函数
     const handleSelectBattlefield = (battlefield) => {
-        // 检查玩家等级是否符合战场要求
-        if (player.level < battlefield.levelRange[0]) {
-            alert(`您的等级太低，无法进入${battlefield.name}！需要至少${battlefield.levelRange[0]}级。`);
+        // 检查战场是否解锁
+        if (isLocked(battlefield)) {
+            // 获取前一个战场的名称
+            const prevBattlefield = battlefields[battlefields.indexOf(battlefield) - 1];
+            alert(`请先击败${prevBattlefield.name}的Boss以解锁此区域！`);
             return;
         }
 
@@ -20,6 +21,19 @@ const BattlefieldSelect = () => {
             type: 'SELECT_BATTLEFIELD',
             payload: battlefield
         });
+    };
+
+    // 检查战场是否锁定
+    const isLocked = (battlefield) => {
+        // 第一个战场始终解锁
+        if (battlefield.id === 'novice') return false;
+
+        // 获取此战场之前的战场
+        const index = battlefields.indexOf(battlefield);
+        const previousBattlefield = battlefields[index - 1];
+
+        // 如果前一个战场的Boss未击败，则锁定
+        return !previousBattlefield.bossDefeated;
     };
 
     // 打开角色信息窗口
@@ -85,29 +99,45 @@ const BattlefieldSelect = () => {
             </div>
 
             <div className="battlefields-container">
-                {battlefields.map((battlefield) => (
-                    <div
-                        key={battlefield.id}
-                        className={`battlefield-card ${player.level < battlefield.levelRange[0] ? 'locked' : ''}`}
-                        onClick={() => handleSelectBattlefield(battlefield)}
-                        style={{
-                            background: `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.6)), ${battlefield.background}`
-                        }}
-                    >
-                        <h3 className="battlefield-name">{battlefield.name}</h3>
-                        <div className="battlefield-level">
-                            适合等级: {battlefield.levelRange[0]}-{battlefield.levelRange[1]}
-                        </div>
-                        <p className="battlefield-description">{battlefield.description}</p>
+                {battlefields.map((battlefield, index) => {
+                    const locked = isLocked(battlefield);
 
-                        {player.level < battlefield.levelRange[0] && (
-                            <div className="battlefield-locked">
-                                <span className="lock-icon">🔒</span>
-                                <span className="lock-text">等级不足</span>
+                    return (
+                        <div
+                            key={battlefield.id}
+                            className={`battlefield-card ${locked ? 'locked' : ''}`}
+                            onClick={() => handleSelectBattlefield(battlefield)}
+                            style={{
+                                background: `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.6)), ${battlefield.background}`
+                            }}
+                        >
+                            <h3 className="battlefield-name">{battlefield.name}</h3>
+                            <div className="battlefield-level">
+                                适合等级: {battlefield.levelRange[0]}-{battlefield.levelRange[1]}
                             </div>
-                        )}
-                    </div>
-                ))}
+                            <p className="battlefield-description">{battlefield.description}</p>
+
+                            {/* Boss状态显示 */}
+                            <div className="battlefield-boss-status">
+                                <span className="boss-label">BOSS:</span>
+                                {battlefield.bossDefeated ? (
+                                    <span className="boss-defeated">已击败 ✓</span>
+                                ) : (
+                                    <span className="boss-undefeated">未击败 ✗</span>
+                                )}
+                            </div>
+
+                            {locked && (
+                                <div className="battlefield-locked">
+                                    <span className="lock-icon">🔒</span>
+                                    <span className="lock-text">
+                                        {index > 0 ? `击败${battlefields[index - 1].name}Boss以解锁` : '未解锁'}
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             <div className="game-stats">
@@ -139,6 +169,10 @@ const BattlefieldSelect = () => {
                 <div className="stat-item">
                     <span className="stat-label">装备数量:</span>
                     <span className="stat-value">{inventory.items.length}/{inventory.maxSlots}</span>
+                </div>
+                <div className="stat-item">
+                    <span className="stat-label">已击败Boss:</span>
+                    <span className="stat-value">{battlefields.filter(bf => bf.bossDefeated).length}/{battlefields.length}</span>
                 </div>
             </div>
 
